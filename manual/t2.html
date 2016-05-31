@@ -1,0 +1,66 @@
+<p><head>
+<title>多线程</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head></p>
+
+<h1>多线程</h1>
+
+<h2>API参考</h2>
+
+<ul>
+<li><a href="api/pthread_mutex_init.html">pthread_mutex_init</a></li>
+<li><a href="api/pthread_mutex_init.html">pthread_mutex_destroy</a></li>
+<li><a href="api/pthread_mutex_lock.html">pthread_mutex_lock</a></li>
+<li><a href="api/pthread_mutex_lock.html">pthread_mutex_unlock</a></li>
+<li><a href="api/pthread_cond_init.html">pthread_cond_init</a></li>
+<li><a href="api/pthread_cond_init.html">pthread_cond_destroy</a></li>
+<li><a href="api/pthread_cond_wait.html">pthread_cond_wait</a></li>
+<li><a href="api/pthread_cond_signal.html">pthread_cond_signal</a></li>
+<li><a href="api/pthread_cond_signal.html">pthread_cond_broadcast</a></li>
+</ul>
+
+
+<h2>例子</h2>
+
+<ul>
+<li><a href="thread/mutex.c">互斥量例子</a></li>
+<li><a href="thread/produce-cond.c">生产者消费者/条件变量</a></li>
+<li><a href="thread/produce-sema.c">生产者消费者/信号量</a></li>
+</ul>
+
+
+<h2>题目</h2>
+
+<ul>
+<li><p>pc1.c: 使用条件变量解决生产者、计算者、消费者问题</p>
+
+<ul>
+<li>系统中有3个线程：生产者、计算者、消费者</li>
+<li>系统中有2个容量为4的缓冲区：buffer1、buffer2</li>
+<li>生产者生产'a'、'b'、'c'、‘d'、'e'、'f'、'g'、'h'八个字符，放入到buffer1</li>
+<li>计算者从buffer1取出字符，将小写字符转换为大写字符，放入到buffer2</li>
+<li>消费者从buffer2取出字符，将其打印到屏幕上</li>
+</ul>
+</li>
+<li><p>pc2.c: 使用信号量解决生产者、计算者、消费者问题</p>
+
+<ul>
+<li>功能和前面的实验相同，使用信号量解决</li>
+</ul>
+</li>
+<li><p>ring.c: 创建N个线程，它们构成一个环</p>
+
+<ul>
+<li>创建N个线程：T1、T2、T3、&hellip; TN</li>
+<li>T1向T2发送整数1</li>
+<li>T2收到后将整数加1</li>
+<li>T2向T3发送整数2</li>
+<li>T3收到后将整数加1</li>
+<li>T3向T4发送整数3</li>
+<li>&hellip;</li>
+<li>TN收到后将整数加1</li>
+<li>TN向T1发送整数N</li>
+</ul>
+</li>
+</ul>
+

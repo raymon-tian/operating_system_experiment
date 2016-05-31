@@ -1,0 +1,13 @@
+struct var {
+    struct var *next;
+    char *name;
+    char *value;
+    int export;
+};
+
+struct var *var_list;
+
+void init_var_list(char *envp[]);
+char *get_var(char *name);
+void set_var(char *name, char *value);
+void export_var_list(char *envp[]);

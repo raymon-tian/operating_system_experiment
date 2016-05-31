@@ -1,0 +1,74 @@
+<p><head>
+<title>并行搜索</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head></p>
+
+<h1>并行搜索</h1>
+
+<h2>API参考</h2>
+
+<ul>
+<li>多线程环境下，使用readdir_r而不是readdir</li>
+<li><a href="api/readdir.html">readdir_r</a></li>
+<li><a href="api/opendir.html">opendir_r</a></li>
+<li><a href="api/closedir.html">closedir_r</a></li>
+</ul>
+
+
+<h2>例子</h2>
+
+<ul>
+<li><a href="pool/readdir.c">统计目录下文件个数, 不包括子目录</a></li>
+<li><a href="pool/thread.c">线程池技术</a></li>
+</ul>
+
+
+<h2>线程池技术</h2>
+
+<ul>
+<li><a href="http://en.wikipedia.org/wiki/Thread_pool_pattern">Wikipedia参考</a></li>
+<li><img src="pool.png"/></li>
+<li>Thread pool pattern is where a <strong>fixed number</strong> of threads are created to perform a number of tasks, which are usually organized in a queue.</li>
+<li>The results from the tasks being executed might also be placed in a queue, or the tasks might return no result.</li>
+<li>Typically, <strong>there are many more tasks than threads</strong>.</li>
+<li>As soon as a thread completes its task, it will request the next task from the queue until all tasks have been completed.</li>
+</ul>
+
+
+<h2>线程池优点</h2>
+
+<ul>
+<li>If the number of tasks is very large, then <strong>creating a thread for each one may be impractical</strong>.</li>
+<li>Creating and destroying a thread and its associated resources is an expensive process in terms of time.</li>
+<li>An excessive number of threads will also waste memory, and context-switching between the runnable threads also damages performance.</li>
+<li>Another advantage of using a thread pool over creating a new thread for each task is thread creation and destruction overhead is negated(抵消), which may result in better performance and better system stability.</li>
+</ul>
+
+
+<h2>题目</h2>
+
+<ul>
+<li><p>sscan.c: 扫描/usr/include目录下所有.h文件，统计包含单词define的行数总和</p>
+
+<ul>
+<li>包括/usr/include目录下的子目录</li>
+<li>统计结果应该与以下命令的结果相同<br>
+grep -R define /usr/include | wc -l</li>
+<li>使用串行的算法即可</li>
+</ul>
+</li>
+<li><p>pscan.c: 与Serial的功能相同</p>
+
+<ul>
+<li>使用基于线程池的并行算法</li>
+<li>使用固定数目的线程进行处理
+
+<ul>
+<li>通常，该数目等于CPU核心个数</li>
+<li>通常，该数目远远小于需要处理的文件个数</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+

@@ -1,0 +1,902 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head>
+<!-- saved from url=(0046)http://www2.linuxforum.net/mhss/shell/bsh.html -->
+<title>An Introduction to the Unix Shell</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<meta http-equiv="Content-Language" content="zh-cn">
+<meta content="MSHTML 6.00.2800.1400" name="GENERATOR"></head><body link="#0000ff" alink="#ff0000" vlink="#600060">
+<h1 align="center">Unix Shell 介绍</h1>
+<p align="center"><font face="Times  New  Roman">S. R. Bourne</font></p>
+<p align="center"><font face="Times  New  Roman">Bell </font>实验室 <font face="Times  New  Roman">Murray Hill, New Jersey 07974</font></p>
+<p align="center"><a href="mailto:mhss%3Cjijingzhisheng@up369.com%3E">翻译：寒蝉退士</a></p>
+<p class="TITLE"><font size="2"><b>译者声明</b>：译者对译文不做任何担保，译者对译文不拥有任何权利并且不负担任何责任和义务。<br><b>原文：</b>http://cm.bell-labs.com/7thEdMan/shell.bun</font></p>
+<h3 align="center">摘要</h3>
+<p>shell 是提供到 UNIX 操作系统的接口的一个命令编程语言。它的特征包括控制流原语、参数传递、变量和字符串替换。还可获得如 while、if 
+then else、 case 和 for 这样的构造。在 shell 
+和命令之间可以有双向通信。可以把字符串值参数、典型的文件名字和标志传递给命令。命令设置的返回值可用来决定控制流，而来自命令的标准输出可用作 shell 
+输入。</p>
+<p>shell 
+可以修改命令在其中运行的环境。输入和输出可以重定向到文件，可以调用通过“管道”通信的进程。通过按照可以由用户指定的顺序查找文件系统中的目录来找到命令。命令可以读取自终端或文件，这允许把命令过程存储起来以备将来使用。 
+</p>
+<p align="left"><font size="2" face="Times New Roman">November 12, 1978</font> </p>
+<hr>
+
+<ul>
+  <li>
+  <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#1.0">1.0 介绍</a></font> 
+  </p><ul>
+    <li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#1.1">1.1 
+    简单命令</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#1.2">1.2 
+    后台命令</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#1.3">1.3 
+    输入输出重定向</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#1.4">1.4 
+    管道线和过滤器</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#1.5">1.5 
+    文件名生成</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#1.6">1.6 引用</a></font> 
+    </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#1.7">1.7 提示</a></font> 
+    </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#1.8">1.8 shell 
+    和登录</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#1.9">1.9 总结</a></font> 
+    </p></li></ul>
+  </li><li>
+  <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#2.0">2.0 shell 
+  过程</a></font> 
+  </p><ul>
+    <li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#2.1">2.1 控制流 - 
+    for</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#2.2">2.2 控制流 - 
+    case</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#2.3">2.3 
+    立即文档</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#2.4">2.4 shell 
+    变量</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#2.5">2.5 test 
+    命令</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#2.6">2.6 控制流 - 
+    while</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#2.7">2.7 控制流 - 
+    if</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#2.8">2.8 
+    命令组合</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#2.9">2.9 调试 shell 
+    过程</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#2.10">2.10 man 
+    命令</a></font> </p></li></ul>
+  </li><li>
+  <p align="left">　 
+  </p><ul>
+    <li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#3.0">3.0 
+    关键字参数</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#3.1">3.1 
+    参数传送</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#3.2">3.2 
+    参数替换</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#3.3">3.3 
+    命令替换</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#3.4">3.4 
+    求值和引用</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#3.5">3.5 
+    错误处理</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#3.6">3.6 
+    故障处理</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#3.7">3.7 
+    命令执行</a></font> </p>
+    </li><li>
+    <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#3.8">3.8 调用 
+    shell</a></font> </p></li></ul>
+  </li><li>
+  <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#%E8%87%B4%E8%B0%A2">致谢</a></font> </p>
+  </li><li>
+  <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#A">附录 A - 文法</a></font> 
+  </p>
+  </li><li>
+  <p align="left"><font size="2"><a href="http://www2.linuxforum.net/mhss/shell/bsh.html#B">附录 B - 
+  元字符和保留字</a></font> </p></li></ul>
+<hr>
+
+<h2><a name="1.0">1.0</a> 介绍 </h2>shell 既是一个命令语言又是提供到 UNIX 
+操作系统的接口的一个编程语言。这个备忘录用例子描述 UNIX shell。第一章覆盖多数终端用户的日常需要。熟悉 UNIX 
+对读本章是很有利的，否则可阅读如“UNIX for beginners”这样的文章。第 2 章描述主要意图用在 shell 过程中的那些特征。这包括 shell 
+提供的控制流原语(primitive)和字符串值变量。在读本章的时候编程语言的知识将是有帮助的。最后一章描述 shell 的更高级的特征。文中的“参见 pipe 
+(2)”引用的是 UNIX 手册的一个章节。 
+<h3><a name="1.1">1.1</a> 简单命令 
+</h3>简单命令由一个或多个用空白分隔的字组成。第一个字是要执行的命令的名字；所有余下的字被作为传递给命令的实际参数。例如， <pre>	who
+</pre>是打印用户登录的名字的一个命令。命令 <pre>	ls -l
+</pre>打印在当前目录中的文件的一个列表。实际参数 -l 告诉 ls 打印每个文件的状态信息、大小和建立日期。 
+<h3><a name="1.2">1.2</a> 后台命令 </h3>要执行一个命令，shell 
+通常建立一个新进程并等待它完成。可以执行一个命令而不用等待它完成。例如， <pre>	cc pgm.c &amp;
+</pre>调用 C 编译器来编译文件 pgm.c。尾随的 <b>&amp;</b> 是指示 shell 
+不等待命令完成的一个操作符。为了跟踪这样一个进程，shell 在建立它之后报告它的进程编号。可以使用 ps 命令来获得当前活跃进程的一个列表。 
+<h3><a name="1.3">1.3</a> 输入输出重定向 
+</h3>多数命令在最初连接到这个终端上的标准输出上生成输出。这个输出可以通过写操作发送到一个文件，例如， <pre>	ls -l &gt;file
+</pre>记号 &gt;file 由 shell 来解释并且不作为一个实际参数传递给 ls。如果文件不存在则 shell 建立它；否则文件的最初内容被来自 
+ls 的输出所替代。可以使用下面的记号把输出添加到一个文件 <pre>	ls -l &gt;&gt;file
+</pre>在这种情况下如果 file 不存在则也建立它。
+<p>可以通过写操作使一个命令的标准输入接受自一个文件而不是终端，例如， </p><pre>	wc &lt;file
+</pre>命令 wc 读它的标准输入(在这种情况下重定向自文件)并打印发现的字符、字和行的数目。如果只需要行的数目则可以使用 <pre>	wc -l &lt;file
+</pre>
+<h3><a name="1.4">1.4</a> 管道线和过滤器 </h3>可以通过写‘管道’操作符 <b>|</b> 
+把一个命令的标准输出连接到另一个命令标准输入上，如在 <pre>	ls -l | wc
+</pre>中以这种方式连接的两个命令组成一个管道线与下面的表述 <pre>	ls -l &gt;file; wc &lt;file
+</pre>除了未使用 file 之外整体效果上等同。但这两个进程是用管道连接的(参见 pipe (2))而且是并行运行。
+<p>管道是单向的，并通过当管道中没有东西可读的时候暂停 wc 和当管道满的时候暂停 ls 来实现同步。
+</p><p>过滤器是读它的标准输入，以某种方式转换它，并输出结果作为输出的命令。这样的一个过滤器如 grep， 从它的输入中选择出包含指定字符串的那些行。例如， </p><pre>	ls | grep old
+</pre>打印来自 ls 的输出中包含字符串 old 的那些行，如果有的话。另一个有用的过滤器是 sort。例如， <pre>	who | sort
+</pre>
+<p>将打印登录的用户的按字符排序的一个列表。</p>
+<p>一个管道线可以由多于两个的命令组成，例如， </p><pre>	ls | grep old | wc -l
+</pre>打印在当前目录中的文件名字中包含字符串 old 的数目。 
+<h3><a name="1.5">1.5</a> 文件名生成 </h3>许多命令接受的实际参数是文件名字。例如， <pre>	ls -l main.c
+</pre>打印与文件 main.c 相关的信息。
+<p>shell 提供一种机制来生成匹配一个模式的文件名字的一个列表。例如， </p><pre>	ls -l *.c
+</pre>生成在当前目录中的结束于 .c 的所有文件名字，作为给 ls 的实际参数。字符 * 是匹配包括空串的任何字符串的一个模式。一般的模式可以指定如下。 
+<blockquote>
+  <dl compact="compact">
+    <dt><b>*</b> 
+    </dt><dd>匹配包括空串的任何字符串。 
+    </dd><dt><b>?</b> 
+    </dt><dd>匹配任何单一字符。 
+    </dd><dt><b>[...]</b> 
+    </dt><dd>匹配包围的字符中的任何一个。用减号分隔的一对字符匹配在词法上位于这两个字符之间的任何字符(含这两个字符)。 
+</dd></dl></blockquote>例如， <pre>	[a-z]*
+</pre>匹配在当前目录中开始于 a 到 z 中的一个字母的所有名字。 <pre>	/usr/fred/test/?
+</pre>匹配在目录<b> /usr/fred/test 
+</b>中由一个单一字符组成的所有名字。如果没有找到匹配这个模式的名字，则把这个模式不做变动的作为实际参数传递。
+<p>这个机制对保存键入和依据某个模式选择名字二者都有用。它还用于查找文件。例如， </p><pre>	echo /usr/fred/*/core
+</pre>找到并打印在<b> /usr/fred</b><b> </b>的子目录中所有 core 文件的名字。(echo 是标准 UNIX 
+命令，打印它的由空白分隔的实际参数)。最后的特征可能是昂贵的，它需要检索 <b>/usr/fred</b><b> </b>的所有子目录。
+<p>对针对模式的一般规则有一个例外。在一个文件名字开始处的字符‘<b>.</b>’必须被显式的匹配。 </p><pre>	echo *
+</pre>将回显在当前目录中不以‘<b>.</b>’开始的所有文件名字。 <pre>	echo <b>.</b>*
+</pre>将回显以‘<b>.</b>’开始的所有文件名字。这避免了无意中匹配了名字‘<b>.</b>’ 
+和‘<b>..</b>’，它们分别意味着‘当前目录’和‘父目录’。(注意 ls 抑制针对‘<b>.</b>’和‘<b>..</b>’的信息。) 
+<h3><a name="1.6">1.6</a> 引用 </h3>对 shell 有特定意义的字符，如 <b>&lt; &gt; * ? | &amp;</b> 
+叫做元字符。在附录 B 中给出元字符的一个完整列表。以 <b>\</b> 为前导的任何字符是被引用的并失去了它的特殊意义，如果有的话。删除 <b>\</b> 
+所以 <pre>	echo \?
+</pre>将回显一个单一 <b>?</b>，并且 <pre>	echo \\
+</pre>将回显一个单一的 <b>\</b>。为了允许长字符串在多于一行上延续，忽略序列 <b>\换行</b>。
+<p><b>\</b> 便于引用单一字符。当多于一个字符需要引用的时候上述机制就是蠢笨的和错误的倾向。字符串可以通过用单引号包围来引用。例如， </p><pre>	echo xx'****'xx
+</pre>将回显 <pre>	xx****xx
+</pre>引用的字符串不可以包含单引号但可以包含并保留换行。这种引用机制是最简单的并建议偶尔使用。
+<p>还有第三种引用机制使用双引号，它防止对一些但不是全部元字符的解释。详情参见 3.4 节。 
+</p><h3><a name="1.7">1.7</a> 提示 </h3>在从终端使用 shell 
+的时候，在读一个命令之前它发出一个提示。缺省的这个提示是‘<b>$</b>’。可用下面的方法改变它，例如， <pre>	PS1=yesdear
+</pre>设置提示为字符串 yesdear。如果键入了换行并且需要进一步的输入，则 shell 
+将发出提示‘<b>&gt;</b>’。有时这是缺少引号所导致的。如果这是意外的则一次中断(DEL)将使 shell 
+返回来读另一个命令。这个提示可以用下面的方法改变，例如， <pre>	PS2=more
+</pre>
+<h3><a name="1.8">1.8</a> shell 和登录 </h3>紧随 login (1) 之后调用 shell 
+来读取和执行在终端上键入的命令。如果这个用户的登录目录中包含文件 <b>.profile</b> 则假定它包含命令并且在 shell 
+从终端读取任何命令之前读取它。 
+<h3><a name="1.9">1.9</a> 总结 </h3>
+<blockquote>
+  <dl>
+    <dt><b>ls</b> 
+    </dt><dd>打印在当前目录中的文件的名字。 
+    </dd><dt><b>ls &gt;file</b> 
+    </dt><dd>把来自 ls 的输出放置到 file 中。 
+    </dd><dt><b>ls | wc -l</b> 
+    </dt><dd>打印在当前目录中文件的数目。 
+    </dd><dt><b>ls | grep old</b> 
+    </dt><dd>打印包含字符串 old 的那些文件名字。 
+    </dd><dt><b>ls | grep old | wc -l</b> 
+    </dt><dd>打印名字中包含字符串 old 的那些文件的数目。 
+    </dd><dt><b>cc pgm.c &amp;</b> 
+    </dt><dd>在后台运行 cc。 </dd></dl></blockquote>
+<hr>
+
+<h2><a name="2.0">2.0</a> shell 过程 </h2>可以用 shell 读取和执行包含在文件中的命令。例如， <pre>	sh file [ args <b>...</b> ]
+</pre>调用 shell 来从 file 读取命令。这样的文件叫做命令过程或 shell 过程。实际参数可以提供给调用并在 file 中用位置参数 
+<b>$1</b>、<b>$2</b>、....来引用。例如，如果文件 wg 包含 <pre>	who | grep $1
+</pre>则 <pre>	sh wg fred
+</pre>等价于 <pre>	who | grep fred
+</pre>UNIX 文件有三个独立的属性，读、写和执行。可以使用 UNIX 命令 chmod (1)来使文件可执行。例如， <pre>	chmod +x wg
+</pre>将确保文件 wg 有可执行状态。此后，命令 <pre>	wg fred
+</pre>等同于 <pre>	sh wg fred
+</pre>这允许 shell 过程和程序被交替使用。在任何一种情况下都建立一个新进程来运行命令。
+<p>同为位置参数提供名字一样，在调用中位置参数的数目可获得为 <b>$#</b>。被执行的文件的名字可获得为 <b>$0</b>。
+</p><p>一个特殊的 shell 参数是 <b>$*</b> 被用来替换除了 <b>$0 </b>之外的所有位置参数。它的典型用途是提供一些缺省实际参数，如在 </p><pre>	nroff -T450 -ms $*
+</pre>它简单的把那些给 shell 的实际参数准备转给这个命令。 
+<p>译注：shell 还有一个内置命令 <b>. </b><i>file</i>。它读这个文件中的命令并执行之。</p>
+<h3><a name="2.1">2.1</a> 控制流 - for </h3>shell 过程的一个常见用途是遍历(loop through)实际参数 
+(<b>$1, $2, ...</b>)并且对每一个实际参数执行命令一次。这样的一个过程的例子是 tel 它查找包含如下行的文件 
+<b>/usr/lib/telnos</b> <pre>	<b>...</b>
+	fred mh0123
+	bert mh0789
+	<b>...</b>
+</pre>tel 的文本是 <pre>	for i
+	do grep $i /usr/lib/telnos; done
+</pre>命令 <pre>	tel fred
+</pre>打印在 <b>/usr/lib/telnos</b> 中包含 fred 的那些行。 <pre>	tel fred bert
+</pre>打印包含 fred 的行随后是包含 bert 的行。
+<p><b>for</b> 循环记号由 shell 识别并有一般形式 </p><pre>	<b>for</b> <i>name</i> <b>in</b> <i>w1 w2</i> <b>...</b>
+	<b>do</b> <i>command-list</i>
+	<b>done</b>
+</pre>命令列表(command-list)是由换行或分号分隔或结束的一个或多个命令的一个序列。进一步，保留字如 <b>do</b> 和 
+<b>done</b> 只有紧随一个换行或分号之后才被识别。名字(name)是一个 shell 变量，在每次执行 <b>do</b> 
+后面的命令列表时它将被依次设置为字 w1 w2 <b>...</b>。如果省略了 <b>in</b> w1 w2 <b>...</b> 
+则为每个位置参数执行一次循环；就是说，假定为 <b>in</b> $*。
+<p>使用 <b>for</b> 循环的另一个例子是 create 命令，它的文本是 </p><pre>	for i do &gt;$i; done
+</pre>命令 <pre>	create alpha beta
+</pre>确保两个空文件 alpha 和 beta 存在并且是空的。使用记号 &gt;file 主动的建立一个文件或清除它的内容。 还要注意在 <b>done 
+</b>之前需要一个分号(或换行)。 
+<h3><a name="2.2">2.2</a> 控制流 - case </h3><b>case</b> 记号提供一种多路分支。例如， <pre>	case $# in
+	 1) cat &gt;&gt;$1 ;;
+	 2) cat &gt;&gt;$2 &lt;$1 ;;
+	 *) echo \'usage: append [ from ] to\' ;;
+	esac
+</pre>是一个 append 命令。在调用时带有一个实际参数如 <pre>	append file
+</pre><b>$#</b> 是字符串 1 并使用 cat 命令把标准输入复制到 file 的末端。 <pre>	append file1 file2
+</pre>添加 file1 的内容到 file2 上。如果提供给 append 的实际参数数目不是 1 或 2 则打印指示正确用法的一个消息。
+<p><b>case</b> 命令的一般形式是 </p><pre>	<b>case</b> <i>word</i> <b>in</b>
+	 <i>pattern</i><b>)</b> <i>command-list</i><b>;;</b>
+	 <b>...</b>
+	<b>esac</b>
+</pre>shell 按模式(pattern)出现的次序对每个模式尝试匹配字(word)。如果找到一个匹配则执行相关的命令列表(command-list)并且 
+<b>case</b> 的执行完成。因为 * 是匹配任何字符串的模式它可以用作缺省情况。
+<p>一句警告: shell 不做检查来确保只有一个模式匹配 case 实际参数。找到的一个匹配定义要执行的命令集。在下面的例子中在第二个 * 
+之后的命令将永不执行。 </p><pre>	case $# in
+	 *) <b>...</b> ;;
+	 *) <b>...</b> ;;
+	esac
+</pre>使用 <b>case</b> 构造的另一个例子是区别一个实际参数的不同形式。下列的例子是 cc 命令的一个片断。 <pre>	for i
+	do case $i in
+	 -[ocs]) <b>...</b> ;;
+	 -*) echo \'unknown flag $i\' ;;
+	 *.c) /lib/c0 $i <b>...</b> ;;
+	 *) echo \'unexpected argument $i\' ;;
+	 esac
+	done
+</pre>为了允许同一个命令与多于一个模式相关联，<b>case</b> 命令提供了由 <b>|</b> 分隔的可选择的模式。例如， <pre>	case $i in
+	 -x|-y) <b>...</b>
+	esac
+</pre>等价于 <pre>	case $i in
+	 -[xy]) <b>...</b>
+	esac
+</pre>使用普通的引用惯例所以 <pre>	case $i in
+	 \?) <b>...</b>
+</pre>将匹配字符 <b>?</b>。
+<h3><a name="2.3">2.3</a> 立即文档 </h3><font size="2" color="#e0e0e0">译注：here document 
+翻译成立即文档属于意译，参照寻址方式中立即寻址的先例。</font> 
+<p>在章节 2.1 中 shell 过程 tel 使用文件 <b>/usr/lib/telnos</b> 来为 grep 提供数据。一种替代方式是在这个 
+shell 过程中包含这些数据作为立即文档，如</p><pre>	for i
+	do grep $i &lt;&lt;!
+	 <b>...</b>
+	 fred mh0123
+	 bert mh0789
+	 <b>...</b>
+	!
+	done
+</pre>在这个例子中 shell 接收在 <b>&lt;&lt;!</b> 和 <b>!</b> 之间的行作为 grep 的输入。字符串 <b>!</b> 
+是任意的，这个文档被由紧随 &lt;&lt; 之后的字符串构成的一行所终结。
+<p>下面的过程 edg 展示了文档在提供给 grep 之前，要替换其中的参数。 </p><pre>	ed $3 &lt;&lt;%
+	g/$1/s//$2/g
+	w
+	%
+</pre>调用 <pre>	edg string1 string2 file
+</pre>等价于命令 <pre>	ed file &lt;&lt;%
+	g/string1/s//string2/g
+	w
+	%
+</pre>并在 file 中把所有出现的 string1 改变成 string2。使用 \ 引用特殊字符 <b>$</b> 来防止替换如 <pre>	ed $3 &lt;&lt;+
+	1,\$s/$1/$2/g
+	w
+	+
+</pre>(这个版本的 edg 除了 ed 在没有字符串 <b>$1 </b>出现时打印一个 <b>?</b> 
+之外等同于第一个版本)。通过引用终结字符串可以完全防止在立即文档内的替换，例如， <pre>	grep $i &lt;&lt;\#
+	<b>...</b>
+	#
+</pre>文档被不加修改的提供给 grep。如果在立即文档中不需要参数替换，后一种形式更有效率。
+<h3><a name="2.4">2.4</a> shell 变量 </h3>shell 
+提供字符串值的变量。变量名字开始于一个字母并由字母、数字和下划线组成。可以通过下列写法给出变量的值，例如， <pre>	user=fred box=m000 acct=mh0000
+</pre>它向变量 <b>user</b>、<b>box</b> 和 <b>acct</b> 赋值。可以通过下列写法设置一个变量为空串，例如， <pre>	null=
+</pre>通过把 <b>$</b> 前导于变量的名字来把它替换成变量的值；例如， <pre>	echo $user
+</pre>将回显 fred。
+<p>可以交互式的使用变量为经常使用的字符串提供简写。例如， </p><pre>	b=/usr/fred/bin
+	mv pgm $b
+</pre>将把文件 pgm 从当前目录移动到目录 <b>/usr/fred/bin</b>。对于参数(或变量)替换可以有一种更一般的记号,如 <pre>	echo ${user}
+</pre>它等价于 <pre>	echo $user
+</pre>并在参数名字后跟随着一个字母或数字的时候有用。例如， <pre>	tmp=/tmp/ps
+	ps a &gt;${tmp}a
+</pre>将把 ps 的输出定向到文件 <b>/tmp/psa</b>，而 <pre>	ps a &gt;$tmpa
+</pre>将导致替换变量 <b>tmpa</b> 的值。
+<p>除了 <b>$?</b> 下列都是由 shell 作最初的设置。<b>$?</b> 在每次命令执行之后设置。 
+</p><blockquote>
+  <dl compact="compact">
+    <dt><b>$?</b> 
+    </dt><dd>最近执行的命令的退出状态(返回代码)，是一个十进制数字符串。多数命令如果成功完成则返回一个零退出状态，否则返回一个非零退出状态。测试返回代码的值在以后的 
+    <b>if</b> 和 <b>while</b> 命令中处理。 
+    </dd><dt><b>$#</b> 
+    </dt><dd>位置参数的数目(十进制)。例如用在 append 命令中检查参数的数目。 
+    </dd><dt><b>$$</b> 
+    </dt><dd>这个 shell 的进程编号(十进制)。因为过程编号在现存的进程中是唯一的，这个字符串经常用来生成唯一的临时文件名字。例如， <pre>	ps a &gt;/tmp/ps$$
+	<b>...</b>
+	rm /tmp/ps$$
+</pre>
+    </dd><dt><b>$!</b> 
+    </dt><dd>在后台运行的最后的进程的编号(十进制)。 
+    </dd><dt><b>$-</b> 
+    </dt><dd>当前的 shell 标志，比如 <b>-x</b> 和 <b>-v</b>。 </dd></dl>一些变量对 shell 
+  有特殊意义并应该避免作一般使用。 
+  <dl compact="compact">
+    <dt><b>$MAIL</b> 
+    </dt><dd>在交互使用的时候，shell 在发出提示之前察看这个变量指定的文件。如果指定的文件自从上次察看之后已经被修改了，shell 
+    在提示下一个命令之前打印消息 you have mail。 这个变量典型的在用户登录目录下的文件 <b>.profile</b> 中设置。例如， <pre>	MAIL=/usr/mail/fred
+</pre>
+    </dd><dt><b>$HOME</b> 
+    </dt><dd>cd 命令的缺省实际参数。使用当前目录来解析不以 <b>/</b> 开始的文件名引用，并使用 cd 命令变更它。例如， <pre>	cd /usr/fred/bin
+</pre>使当前目录成为 <b>/usr/fred/bin</b>。 <pre>	cat wn
+</pre>将在终端上打印在这个目录中的文件 wn。命令。没有实际参数的 cd 等价于 <pre>	cd $HOME
+</pre>这个变量典型的也在这个用户的登录 .profile 中设置。 
+    </dd><dt><b>$PATH</b> 
+    </dt><dd>包含命令的目录的一个列表(查找路径)。shell 通过在这个目录列表中查找可执行文件来执行每个命令。如果未设置 <b>$PATH</b> 
+    则缺省的查找当前目录、<b>/bin </b>和 <b>/usr/bin</b>。否则<b>$PATH</b> 由用 <b>: 
+    </b>分隔的目录名字组成。例如， <pre>	PATH=<b>:</b>/usr/fred/bin<b>:</b>/bin<b>:</b>/usr/bin
+</pre>指定以当前目录(在第一个 : 之前的空串)、<b>/usr/fred/bin、/bin</b> 和 <b>/usr/bin</b> 
+    的次序查找。在这种方式下单个用户可以有他们自己‘专有’命令，可在当前目录下单独访问。如果命令名字包含一个 <b>/</b> 
+    则不使用这种目录查找；对执行这个命令作一次单一的尝试。 
+    </dd><dt><b>$PS1</b> 
+    </dt><dd>主要的 shell 提示字符串，缺省是‘<b>$</b>’。 
+    </dd><dt><b>$PS2</b> 
+    </dt><dd>在需要进一步输入时的 shell 提示，缺省是‘<b>&gt;</b>’。 
+    </dd><dt><b>$IFS</b> 
+    </dt><dd>空白解释使用的字符集合(参见章节 3.4)。 </dd></dl></blockquote>
+<h3><a name="2.5">2.5</a> test 命令 </h3>test 命令尽管不是 shell 的一部分，但意图由 shell 程序使用。例如， <pre>	test -f file
+</pre>译注: 在当前版本的 shell 工具中，有一个与 test 等同的命令 [，它接受与 test 一样的实际参数，但要求在实际参数列表的最后附加一个 
+] 作为实际参数。上面的例子也可以写成 <pre>	[ -f file ]
+</pre>
+<p>如果 file 存在则返回零退出状态否则返回非零退出状态。通常 test 计算一个谓词并返回这个结果作为退出状态。下面给出某些经常使用的 test 
+实际参数，详细的规定请参见 test (1)。</p>
+<blockquote>
+  <dl compact="compact">
+    <dt>test s 
+    </dt><dd>如果实际参数 s 不是空串则为真 
+    </dd><dt>test -f file 
+    </dt><dd>如果 file 存在则为真 
+    </dd><dt>test -r file 
+    </dt><dd>如果 file 可读则为真 
+    </dd><dt>test -w file 
+    </dt><dd>如果 file 可写则为真 
+    </dd><dt>test -d file 
+    </dt><dd>如果 file 是目录则为真 </dd></dl></blockquote>
+<h3><a name="2.6">2.6</a> 控制流 - while </h3><b>for</b> 循环的动作和 <b>case</b> 分支由 shell 
+可获得的数据决定。还提供 <b>while</b> 或 <b>until</b> 循环和 <b>if then else</b> 
+分支，它们的动作由命令返回的退出状态决定。<b>while</b> 循环有一般形式 <pre>	<b>while</b> <i>command-list1</i>
+	<b>do</b> <i>command-list2</i>
+	<b>done</b>
+</pre><b>while</b> 命令测试的值是紧随 <b>while </b>之后的最后的简单命令的退出状态。每轮循环都执行 
+command-list1；如果返回一个零退出状态则执行 command-list2；否则中止循环。例如， <pre>	while test $1
+	do <b>...</b>
+	 shift
+	done
+</pre>等价于 <pre>	for i
+	do <b>...</b>
+	done
+</pre>shift 是重命名位置参数 <b>$2, $3, ...</b>为 <b>$1, $2, ...</b> 并丢弃 <b>$1 </b>的一个命令。
+<p>另一种 <b>while/until</b> 循环的用法是等待直到某个外部的事件发生并接着运行某个命令。在 <b>until</b> 
+循环中中止条件是反过来的。例如， </p><pre>	until test -f file
+	do sleep 300; done
+	<i>commands</i>
+</pre>将循环直到 file 存在。每轮循环都在再次尝试之前等待 5 分钟。(推测另一个进程最终会建立这个文件。) 
+<h3><a name="2.7">2.7</a> 控制流 - if </h3>还可以获得下面形式的一般的条件分支， <pre>	<b>if</b> <i>command-list</i>
+	<b>then</b> <i>command-list</i>
+	<b>else</b> <i>command-list</i>
+	<b>fi</b>
+</pre>它测试紧随 <b>if </b>之后的最后一个简单命令的返回值。
+<p><b>if</b> 命令可以与 test 命令联合使用来测试文件的存在如 </p><pre>	if test -f file
+	then <i>process file</i>
+	else <i>do something else</i>
+	fi
+</pre>
+<p>在2.10 节给出使用 <b>if</b>、<b>case</b> 和 <b>for</b> 构造的一个例子。</p>
+<p>形如下面的多重测试 <b>if</b> 命令 </p><pre>	if <b>...</b>
+	then <b>...</b>
+	else if <b>...</b>
+		then <b>...</b>
+		else if <b>...</b>
+			<b>...</b>
+			fi
+		fi
+	fi
+</pre>可以使用 <b>if</b> 记号的一种扩展而写成 <pre>	<b>if</b> <b>...</b>
+	<b>then</b> <b>...</b>
+	<b>elif</b> <b>...</b>
+	<b>then</b> <b>...</b>
+	<b>elif</b> <b>...</b>
+	<b>...</b>
+	<b>fi</b>
+</pre>下列例子是改变一组文件的‘最近修改时间’的 touch 命令。这个命令可以与 make (1)联合使用来重新编译一组文件。 <pre>	flag=
+	for i
+	do case $i in
+	 -c) flag=N ;;
+	 *) if test -f $i
+		then ln $i junk$$; rm junk$$
+		elif test $flag
+		then echo file \'$i\' does not exist
+		else &gt;$i
+		fi
+	 esac
+	done
+</pre>在这命令中使用 <b>-c</b> 来强制后面的文件如果不存在则建立之。否则，如果文件不存在，则打印一个错误消息。如果遇到 <b>-c</b> 
+参数则把 shell 变量 flag 设置为非空字符串。命令 <pre>	ln <b>...</b>; rm <b>...</b>
+</pre>制作到这个文件的一个连接接着删除它，这导致更新最后的修改日期。 
+<p>序列 </p><pre>	if command1
+	then command2
+	fi
+</pre>可以写成 <pre>	command1 <b>&amp;&amp;</b> command2
+</pre>反过来， <pre>	command1 <b>||</b> command2
+</pre>只在 command1 失败时执行 command2。在这些情况下返回值是最后的简单命令的返回值。 
+<h3><a name="2.8">2.8</a> 命令组合 </h3>可以用两种方式组合命令， <pre>	<b>{</b> <i>command-list</i> <b>; }</b>
+</pre>和 <pre>	<b>(</b> <i>command-list</i> <b>)</b>
+</pre>第一个命令列表被简单的执行。第二种形式把命令列表作为一个单独的进程执行。例如， <pre>	(cd x; rm junk )
+</pre>在目录 x 中执行 rm junk 而不改变调用 shell 的当前目录。 
+<p>命令 </p><pre>	cd x; rm junk
+</pre>有相同的效果但把调用 shell 留在目录 x 中。 
+<h3><a name="2.9">2.9</a> 调试 shell 过程 </h3>shell 提供两种跟踪机制来帮助调试 shell 过程。第一种在过程中调用为 
+<pre>	set -v
+</pre>(<b>v</b> 是 verbose冗余)并导致打印过程的行，同读到的一样。这对分离语法错误有用。可以用下列写法调用它而不用修改过程 <pre>	sh -v proc <b>...</b>
+</pre>这里的 proc 是 shell 过程的名字。这个标志可以与 <b>-n</b> 标志联合使用，它防止随后的命令执行。(注意在终端上的 set -n 
+将放弃(render)终端不用直到键入一个文件结束符。) 
+<p>命令 </p><pre>	set -x
+</pre>将产生执行跟踪。紧随参数替换之后按实际上执行的那样打印每个命令。(在终端上尝试一下这种效果)。通过如下表述来关闭这些标志 <pre>	set -
+</pre>而 shell 标志的当前设置可以获得为 <b>$-</b>。 
+<h3><a name="2.10">2.10</a> man 命令 </h3>下面是用来打印 UNIX 手册章节的 man 命令。调用它的例子如下 <pre>	$ <b>man sh</b>
+	$ <b>man -t ed</b>
+	$ <b>man 2 fork</b>
+</pre>打印手册的第一章的 sh。因为没有指定章节，使用第 1 章。第二个例子将用打印机打印(<b>-t</b> 选项)手册章节 ed。 
+最后一个例子打印第二章的 fork 手册页。 <pre>	cd /usr/man
+
+	: '冒号是注释命令'
+	: '缺省是 nroff ($N), 章节 1 ($s)'
+	N=n s=1
+
+	for i
+	do case $i in
+	 [1-9]*) s=$i ;;
+	 -t) N=t ;;
+	 -n) N=n ;;
+	 -*) echo unknown flag \'$i\' ;;
+	 *) if test -f man$s/$i.$s
+		then ${N}roff man0/${N}aa man$s/$i.$s
+		else : 'look through all manual sections'
+			found=no
+			for j in 1 2 3 4 5 6 7 8 9
+			do if test -f man$j/$i.$j
+			 then man $j $i
+				found=yes
+			 fi
+			done
+			case $found in
+			 no) echo \'$i: manual page not found\'
+			esac
+		fi
+	 esac
+	done
+</pre><b>图</b><b> 1.&nbsp; man 命令的一个版本</b> 
+<p>译注：在当前版本的 shell 中把以‘#’开始的一行作为注释</p>
+<hr>
+
+<h2><a name="3.0">3.0</a> 关键字参数 </h2>可以通过赋值或在调用 shell 过程的时候给出 shell 
+变量的值。在命令名字之前的、给 shell 过程的形如 name=value 的实际参数，导致在过程开始之前把 value 赋给 name。这不影响调用 
+shell 中的 name 的值。例如， <pre>	user=fred command
+</pre>执行 command 并把 user 设置为 fred。<b>-k</b> 标志导致在实际参数列表中所有地方的形如 name=value 
+的实际参数都按这种方式来解释。这种名字有时叫做关键字参数。如果有任何实际参数剩下则它们可以获得为位置参数 <b>$1, $2,</b> <b>....</b> 
+<p>还可以使用 set 命令在过程内设置位置参数。例如， </p><pre>	set - *
+</pre>将设置 <b>$1</b> 为在当前目录中的第一个文件名字，<b>$2</b> 为下一个，以此类推。注意第一个实际参数 -，确保在第一个文件名字以 
+- 开始时作出正确的处置。 
+<h3><a name="3.1">3.1</a> 参数传送 </h3>当调用一个 shell 
+过程的时候可以同时提供位置和关键字参数。还可以通过预先指定某些参数是导出的，使一个 shell 过程隐蔽的获得关键字参数。例如， <pre>	export user box
+</pre>标记变量 <b>user</b> 和 <b>box</b> 为导出。在调用一个 shell 
+过程的时候，在这个被调用的过程中制作所有可导出的变量的使用副本。在这个过程中对这些变量的修改不影响在调用 shell 中的变量。一般而言，一个 shell 
+过程不向调用者发出显式的请求就不能改变它的调用者的状态。(共享的文件描述符是这个规则的一个例外)。 
+<p>值要保持不变的名字可以声明为 readonly。这个命令的形式同于 export 命令， </p><pre>	readonly name <b>...</b>
+</pre>后面的设置只读变量的尝试将是非法的。 
+<h3><a name="3.2">3.2</a> 参数替换 </h3>如果一个 shell 参数未设置则把它替换成空串。例如，如果变量 <b>d</b> 未设置 <pre>	echo $d
+</pre>或 <pre>	echo ${d}
+</pre>将什么都不回显。缺省的字符串可以给出为 <pre>	echo ${d-<b>.</b>}
+</pre>如果变量 <b>d</b> 设置了则回显它的值否则回显‘<b>.</b>’。使用常规的引用惯例求值缺省字符串所以 <pre>	echo ${d-'*'}
+</pre>表示如果变量 <b>d</b> 未设置则回显 <b>*</b>。类似的 <pre>	echo ${d-$1}
+</pre>表示如果变量 <b>d</b> 的值未设置则回显这个值否则回显 <b>$1</b>。使用如下记号向一个变量赋予一个缺省值 <pre>	echo ${d=<b>.</b>}
+</pre>它替换的字符串同于 <pre>	echo ${d-<b>.</b>}
+</pre>并且如果变量 <b>d</b> 以前未设置则把它设置为字符串‘<b>.</b>’。(记号 ${<b>...</b>=<b>...</b>} 
+不适用于位置参数)。 
+<p>如果没有合适的缺省则记号 </p><pre>	echo ${d?message}
+</pre>表示如果变量 <b>d</b> 有值则回显它，否则 shell 打印 message 并且这个 shell 过程的执行异常中止。如果空缺 
+message 则打印一个标准消息。要求某些参数必须设置的 shell 过程可以如下面这样开始。 <pre>	: ${user?} ${acct?} ${bin?}
+	<b>...</b>
+</pre>冒号(<b>:</b>)是内置到 shell 中的一个命令并且在求值了它的实际参数之后什么都不做。若变量 
+<b>user</b>、<b>acct</b> 或 <b>bin</b> 中任何一个未设置则 shell 将中止这个过程的执行。 
+<h3><a name="3.3">3.3</a> 命令替换 </h3>来自命令的标准输出可以按类似于参数的方式进行替换。命令 pwd 
+在它的标准输出上打印当前目录的名字。例如，如果当前目录是 <b>/usr/fred/bin</b> 则命令 <pre>	d=`pwd`
+</pre>等价于 <pre>	d=/usr/fred/bin
+</pre>译注: 在当前版本的 shell 中为命令替换增加了新的文法形式<b>$(...)</b>，上面的例子也可以写成 <pre>	d=$(pwd)</pre>
+<p>在重音号(`<b>...</b>`)之间的全部字符串被接受为要执行的命令并且由这个命令的输出所替代。除了使用 <b>\ </b>转义 
+<b>`</b>之外，使用常规的引用惯例表述这个命令。例如，</p><pre>	ls `echo "$1"`
+</pre>等价于 <pre>	ls $1
+</pre>在发生参数替换的所有上下文中都发生命令替换(包括立即文档)，并且在两种情况下对结果的文档的处理是 相同的。这个机制允许在 shell 
+内使用字符串处理命令。这种命令的例子是 basename，它从一个字符串删除指定的后缀。例如， <pre>	basename main<b>.</b>c <b>.</b>c
+</pre>将打印字符串 main。用来自 cc 命令的一个片断来展示它的用途。 <pre>	case $A in
+	 <b>...</b>
+	 *<b>.</b>c) B=`basename $A <b>.</b>c`
+	 <b>...</b>
+	esac
+</pre>将设置 <b>B</b> 为 <b>$A</b> 去除了后缀 <b>.c</b> 的那部分。 
+<p>下面是一些符合的例子。 
+</p><dl>
+  <dt>・ <b>for i in `ls -t`; do ...</b> 
+  </dt><dd>变量 <b>i</b> 设置为按时间次序的文件名字，最新者最先。 
+  </dd><dt>・ <b>set `date`; echo $6 $2 $3, $4</b> 
+  </dt><dd>将打印类似下面这样的字符串：1977 Nov 1, 23:59:59 </dd></dl>
+<h3><a name="3.4">3.4</a> 求值和引用 </h3>shell 
+是向给命令的实际参数提供参数替换、命令替换和文件名生成的一个宏处理器。本节讨论这些求值发生的次序和各种引用机制的作用。
+<p>依据在附录 A 中给出的文法初步的分析命令。在命令执行之前发生下列替换。 
+</p><ul>
+  <li>参数替换，例如 <b>$user</b> 
+  </li><li>命令替换，例如 <b>`pwd`</b> </li></ul>
+<blockquote>只发生一次求值，所以如果变量 <b>X</b> 的值是字符串 $y 则 <pre>	echo $X</pre>
+  <p>将回显 $y。 </p></blockquote>
+<ul>
+  <li>空白(blank)解释 </li></ul>
+<blockquote>紧随上述替换之后把结果的字符串分解成非空白的字(空白解释)。用做‘空白’的是字符串 <b>$IFS</b> 
+  的字符。缺省的，这个字符串由空格、tab 和换行组成。空串不作为一个字除非是被引用了。例如<pre>	echo ''
+</pre>将传递这个空串作为给 echo 的第一个实际参数。而 <pre>	echo $null
+</pre>如若变量 <b>null</b> 未设置或被设置为空串则调用 echo 而没有任何实际参数。 </blockquote>
+<ul>
+  <li>文件名字生成 </li></ul>
+<blockquote>接着在每个字中检索文件模式字符 <b>*</b>、<b>?</b> 和 <b>[...]</b> 
+  并生成文件名字的一个按字母顺序的列表来替代这个字。每个这样的文件名字都是一个独立的实际参数。 刚才描述的求值也在与 <b>for</b> 
+  循环关联的字的列表中发生。用于 <b>case</b> 分支的字只发生替换。 </blockquote>
+<p>与早先描述的使用 <b>\</b> 和 
+<b>'...'</b>的引用同时存在的第三种引用机制使用双引号。在双引号内发生参数和命令替换但不发生文件名生成和空白解释。下列字符在双引号内有特殊意义并可以使用 
+<b>\</b> 来引用<b>。</b> 
+</p><blockquote>
+  <dl compact="compact">
+    <dt><b>$</b> 
+    </dt><dd>参数替换 
+    </dd><dt><b>`</b> 
+    </dt><dd>命令替换 
+    </dd><dt><b>"</b> 
+    </dt><dd>终结引用的字符串 
+    </dd><dt><b>\</b> 
+    </dt><dd>引用特殊字符 <b>$ ` " \</b> </dd></dl></blockquote>例如， <pre>	echo "$x"
+</pre>将传递变量 <b>x</b> 的值作为给 echo 的一个单一的实际参数。类似的， <pre>	echo "$*"
+</pre>将传递位置参数作为一个单一的实际参数并等价于 <pre>	echo "$1 $2 <b>...</b>"
+</pre>记号 <b>$@</b> 在除了被引用的时候之外都同于 <b>$*</b>。 <pre>	echo "$@"
+</pre>将传递未求值的位置参数到 echo 并等价于 <pre>	echo "$1" "$2" <b>...</b>
+</pre>下面的表格给出对于每种引用机制，进行求值的 shell 元字符。 <pre>	元字符</pre>
+<table border="0" width="320" cellpadding="0" cellspacing="1">
+  <tbody>
+  <tr>
+    <td align="middle" valign="center" width="14%">　</td>
+    <td align="middle" bgcolor="#e0e0e0" valign="center" width="14%">\</td>
+    <td align="middle" bgcolor="#e0e0e0" valign="center" width="14%">$</td>
+    <td align="middle" bgcolor="#e0e0e0" valign="center" width="14%">*</td>
+    <td align="middle" bgcolor="#e0e0e0" valign="center" width="14%">`</td>
+    <td align="middle" bgcolor="#e0e0e0" valign="center" width="15%">"</td>
+    <td align="middle" bgcolor="#e0e0e0" valign="center" width="15%">'</td></tr>
+  <tr>
+    <td align="middle" bgcolor="#e0e0e0" valign="center" width="14%">'</td>
+    <td align="middle" valign="center" width="14%">n</td>
+    <td align="middle" valign="center" width="14%">n</td>
+    <td align="middle" valign="center" width="14%">n</td>
+    <td align="middle" valign="center" width="14%">n</td>
+    <td align="middle" valign="center" width="15%">n</td>
+    <td align="middle" valign="center" width="15%">t</td></tr>
+  <tr>
+    <td align="middle" bgcolor="#e0e0e0" valign="center" width="14%">`</td>
+    <td align="middle" valign="center" width="14%">y</td>
+    <td align="middle" valign="center" width="14%">n</td>
+    <td align="middle" valign="center" width="14%">n</td>
+    <td align="middle" valign="center" width="14%">t</td>
+    <td align="middle" valign="center" width="15%">n</td>
+    <td align="middle" valign="center" width="15%">n</td></tr>
+  <tr>
+    <td align="middle" bgcolor="#e0e0e0" valign="center" width="14%">"</td>
+    <td align="middle" valign="center" width="14%">y</td>
+    <td align="middle" valign="center" width="14%">y</td>
+    <td align="middle" valign="center" width="14%">n</td>
+    <td align="middle" valign="center" width="14%">y</td>
+    <td align="middle" valign="center" width="15%">t</td>
+    <td align="middle" valign="center" width="15%">n</td></tr></tbody></table><pre> t 终结符
+ y 解释
+ n 不解释
+</pre><b>图</b><b> 2. 引用机制</b> 
+<p>在要求多于一次字符串求值的情况下可以使用内置命令 eval。例如，如果变量 <b>X</b> 有值 $y, 并且若 <b>y</b> 有值 pqr 
+则</p><pre>	eval echo $X
+</pre>将回显字符串 pqr。
+<p>一般的，eval 命令求值它的实际参数(与所有命令一样)并把这个结果作为给 shell 的输入来对待。读这个输入并执行作为结果的命令。例如， </p><pre>	wg=\'eval who|grep\'
+	$wg fred
+</pre>等价于 <pre>	who|grep fred
+</pre>在这例子中，需要 eval 的原因是替换之后不解释元字符如 <b>|</b>。 
+<h3><a name="3.5">3.5</a> 错误处理 </h3>shell 检测到的错误的处理依赖于错误的类型和 shell 是否被交互式使用。交互式 
+shell 的输入和输出连接到终端上(由 gtty (2) 决定)。用 <b>-i</b> 标志调用的 shell 也是交互式的。
+<p>命令的执行(参见 3.7)可能由于下列原因而失败。 
+</p><ul>
+  <li>输入-输出重定向可能失败。例如，如果文件不存在或不能建立。 
+  </li><li>命令自身不存在或不能执行。 
+  </li><li>命令异常中止，例如，出现“总线错误”或“内存错误”。下面的图 2 列出的是 UNIX 信号的完整列表。 
+  </li><li>命令正常中止但返回一个非零退出状态。 </li></ul>在所有这些情况下 shell 将继续执行下一个命令。 除了最后一种情况下 shell 
+打印一个错误消息。所有余下的错误导致 shell 从命令过程中退出。交互式 shell 将返回来从终端读另一个命令。这样的错误包括如下。 
+<ul>
+  <li>语法错误如 if <b>...</b> then <b>...</b> done 
+  </li><li>一个信号如中断。shell 等待当前的命令，如果有的话，完成执行并接着要么退出要么返回到终端。 
+  </li><li>任何内置命令如 cd 的错误。 </li></ul>shell 标志 <b>-e</b> 导致 shell 在检测到任何错误的时候中止。 
+<blockquote>
+  <dl compact="compact">
+    <dt>1 
+    </dt><dd>挂断 
+    </dd><dt>2 
+    </dt><dd>中断 
+    </dd><dt>3* 
+    </dt><dd>退出 
+    </dd><dt>4* 
+    </dt><dd>非法指令 
+    </dd><dt>5* 
+    </dt><dd>跟踪陷入 
+    </dd><dt>6* 
+    </dt><dd>IOT 指令 
+    </dd><dt>7* 
+    </dt><dd>EMT 指令 
+    </dd><dt>8* 
+    </dt><dd>浮点异常 
+    </dd><dt>9 
+    </dt><dd>杀死(不能被捕获或忽略) 
+    </dd><dt>10* 
+    </dt><dd>总线错误 
+    </dd><dt>11* 
+    </dt><dd>段违例 
+    </dd><dt>12* 
+    </dt><dd>给系统调用无效的实际参数 
+    </dd><dt>13 
+    </dt><dd>在没有读者的一个管道上写 
+    </dd><dt>14 
+    </dt><dd>定时时钟 
+    </dd><dt>15 
+    </dt><dd>软件中断(来自 kill (1)) </dd></dl></blockquote><b>图 3. UNIX 信号</b> 
+<p>标记星号的信号如果未捕获则生成一个内存转储(core dump)。但是，shell 自身忽略退出信号，它是可以导致内存转储的唯一的外部信号。这个列表中对 
+shell 程序可能有用的是 1、2、3、14 和 15。</p>
+<h3><a name="3.6">3.6</a> 故障处理 </h3>Shell 
+过程在从终端接收到信号的时候通常会中止。如果需要一些清除，比如删除一些临时文件，则可以使用 trap 命令。例如， <pre>	trap 'rm /tmp/ps$$; exit' 2
+</pre>为信号 2 (终端中断)设置一个陷入，并且如果接收到这个信号则执行命令 <pre>	rm /tmp/ps$$; exit
+</pre>exit 是中止 shell 过程执行的另一个内置命令。exit 是必须的，否则，在陷入发生之后，shell 将在被中断的位置上恢复执行过程。
+<p>UNIX 信号可以用三种方式处理。它们可以被忽略，在这种情况下信号永不发送到进程。它们可以被捕获， 
+在这种情况下进程必须决定在收到信号的时候要做的动作。最后，它们可以被保留，导致进程中止而不做任何进一步动作。如果在进入 shell 
+过程时把一个信号忽略了，例如，是在后台调用的(参见 3.7 节)，则忽略这个 trap 命令(和信号)。
+</p><p>用下面的这修改版本的 touch 命令展示 trap 的用途(图 4)。清除动作是删除文件 <b>junk$$</b>。 </p><pre>	flag=
+	trap 'rm -f junk$$; exit' 1 2 3 15
+	for i
+	do case $i in
+	 -c) flag=N ;;
+	 *) if test -f $i
+		then ln $i junk$$; rm junk$$
+		elif test $flag
+		then echo file \'$i\' does not exist
+		else &gt;$i
+		fi
+	 esac
+	done
+</pre><b>图</b><b> 4. touch 命令</b> 
+<p>trap 命令出现在这个临时文件建立之前；否则进程有可能死去而未删除这个文件。</p>
+<p>因为 UNIX 中没有信号 0，shell 使用它来指示从 shell 过程中退出时要执行的命令。</p>
+<p>过程自身可以通过指定空串作为给 trap 的参数来选择忽略信号。下列片断取自 nohup 命令。</p><pre>	trap '' 1 2 3 15
+</pre>这导致 hangup、interrupt、quit 和 kill 被这个过程和调用的命令所忽略。通过如下表述重置陷入 <pre>	trap 2 3
+</pre>它把给信号 2 和 3 的陷入重置为缺省值。可以通过如下表述获得陷入的当前值的一个列表 <pre>	trap
+</pre>过程 scan (图 5) 是使用 trap 的一个例子，这里的 trap 命令中没有 exit。scan 
+取出在当前目录中的每个目录，提示出它的名字，接着执行在终端键入的命令，直到收到一个文件结束或中断。中断在执行要求的命令期间被忽略，而在等待输入的时候导致 
+scan 中止。 <pre>	d=`pwd`
+	for i in *
+	do if test -d $d/$i
+	 then cd $d/$i
+		while echo "$i:"
+		 trap exit 2
+		 read x
+		do trap : 2; eval $x; done
+	 fi
+	done
+</pre><b>图</b><b> 5. scan 命令</b> 
+<p>read x 是从标准输入读入一行并把结果放置到变量 <b>x </b>中的一个内置命令。如果收到文件结束或中断则返回一个非零退出状态。</p>
+<h3><a name="3.7">3.7</a> 命令执行 </h3>要运行一个命令(除了内置命令)，shell 首先使用系统调用 fork 
+建立一个新进程。在命令执行之前，在子进程中建立这个命令的执行环境包括输入、输出和信号的状态。内置命令 exec 在罕见的情况下使用，这时不需要 fork 
+并用新命令简单的替换 shell。例如，一个简单版本的 nohup 命令如下 <pre>	trap \'\' 1 2 3 15
+	exec $*
+</pre>trap 关闭指定的信号，所以它们被随后建立的命令所忽略，接着 exec 用指定的命令替代这个 shell。
+<p>已经描述了多种形式的输入输出重定向。下面的 word 只服从参数和命令替换。没有文件名字生成或空白解释发生，例如， </p><pre>	echo <b>...</b> &gt;*.c
+</pre>将把它的输出写到名字是 <b>*.c</b> 的一个文件中。输入输出指定按出现在命令中那样从左至右的求值。 
+<blockquote>
+  <dl compact="compact">
+    <dt>&gt; <i>word</i> 
+    </dt><dd>把标准输出(文件描述符 1)发送到文件 word，如果它不存在则建立之。 
+    </dd><dt>&gt;&gt; <i>word</i> 
+    </dt><dd>把标准输出发送到文件 word。如果文件存在则输出被添加(通过找到结尾)；否则建立这个文件。 
+    </dd><dt>&lt; <i>word</i> 
+    </dt><dd>标准输入(文件描述符 0)接收自文件 word。 
+    </dd><dt>&lt;&lt; <i>word</i> 
+    </dt><dd>标准输入接受自 shell 输入的行，从下一行开始直到但不包括只由 word 组成的那一行。 如果引用了 word 则不解释这个文档。如果未引用 
+    word 则发生参数和命令替换并且使用 <b>\</b> 来引用字符 <b>\ $ `</b> 和 word 的第一个字符。在后面的情况下忽略 
+    <b>\newline</b>(参见：引用字符串)。 
+    </dd><dt>&gt;&amp; <i>digit</i> 
+    </dt><dd>使用系统调用 dup (2) 复制文件描述符 digit 并把结果用作标准输出。 
+    </dd><dt>&lt;&amp; <i>digit</i> 
+    </dt><dd>标准输入复制自文件描述符 digit。 
+    </dd><dt>&lt;&amp;- 
+    </dt><dd>关闭标准输入。 
+    </dd><dt>&gt;&amp;- 
+    </dt><dd>关闭标准输出。 </dd></dl></blockquote>上述所有形式都可以前导一个数字，此时建立的文件描述符由这个数字指定而不是缺省的 0 或 
+1。例如， <pre>	<b>...</b> 2&gt;file
+</pre>运行一个命令并把消息输出(文件描述符 2)定向到 file。 <pre>	<b>...</b> 2&lt;&amp;1
+</pre>运行一个命令并把它的标准输出和消息输出合并。(严格的说是通过复制文件描述符 1 来建立文件描述符 2 但效果通常是合并了两个流。) 
+<p>在后台运行的如下命令的环境 </p><pre>	list *.c | lpr &amp;
+</pre>要进行两种方式的修改。首先，这种命令的缺省标准输入是空文件 <b>/dev/null</b>。这防止并行运行的两个进程(shell 
+和这个命令)，尝试读相同输入。如果不是这样则混乱将继而发生。例如， <pre>	ed file &amp;
+</pre>将允许编辑器和 shell 二者同时读相同的输入。
+<p>对后台命令的环境的另一种修改是关闭 QUIT 和 INTERRUPT 信号所以它们被这个命令所忽略。这允许在终端使用这些信号而不导致后台命令被中止。为此 
+UNIX 的信号惯例是如果它被设置为 1 (忽略)则永不改变即使是短时。注意 shell 命令 trap 对被忽略的信号无效。 
+</p><h3><a name="3.8">3.8</a> 调用 shell </h3>在调用 shell 
+的时候解释下列标志。如果实际参数零的第一个字符是一个减号，则命令读自文件 <b>.profile</b>。 
+<blockquote>
+  <dl compact="compact">
+    <dt><b>-c</b> <i>string</i> 
+    </dt><dd>如果提供 <b>-c</b> 标志则命令读自 string。 
+    </dd><dt><b>-s</b> 
+    </dt><dd>如果提供了 <b>-s</b> 标志或者没有余下的实际参数则命令读自标准输入。shell 输出被写到文件描述符 2。 
+    </dd><dt><b>-i</b> 
+    </dt><dd>如果提供了 <b>-i</b> 标志或者 shell 输入和输出被连接到一个终端(通过 gtty 获得)则这个&nbsp; shell 
+    是交互的。在这种情况下忽略 TERMINATE(所以 <b>kill 0</b> 不能杀死一个交互式的 shell)，捕获并忽略 
+    INTERRUPT(所以 <b>wait</b> 是可中断的)。在所有情况下 shell 都忽略 QUIT。 </dd></dl></blockquote>
+<hr>
+
+<h3><a name="致谢">致谢</a> </h3>shell 的设计部分基于最初的 UNIX shell 和 PWB/UNIX 
+shell，一些特征取自二者。与 Cambridge Multiple Access System 和 CTSS 的命令解释器也有类似之处。
+<p>我要感谢 Dennis Ritchie 和 John Mashey 在 shell 设计期间做的许多讨论。还要感谢 Computing Science 
+Research Center 的成员和 Joe Maranzano 对这个文档的意见。 
+</p><hr>
+
+<h3>附录 <a name="A">A</a> - 文法 </h3>
+<dl>
+  <dt><i>item:</i> 
+  </dt><dd><i>word</i> 
+  </dd><dd><i>input-output</i> 
+  </dd><dd><i>name = value</i> 
+  </dd><dt><i>simple-command:</i> 
+  </dt><dd><i>item</i> 
+  </dd><dd><i>simple-command item</i> 
+  </dd><dt><i>command:</i> 
+  </dt><dd><i>simple-command</i> 
+  </dd><dd><b>(</b> <i>command-list</i> <b>)</b> 
+  </dd><dd><b>{</b> <i>command-list</i> <b>}</b> 
+  </dd><dd><b>for</b> <i>name</i> <b>do</b> <i>command-list</i> <b>done</b> 
+  </dd><dd><b>for</b> <i>name</i> <b>in</b> <i>word</i> <b>... do</b> 
+  <i>command-list</i> <b>done</b> 
+  </dd><dd><b>while</b> <i>command-list</i> <b>do</b> <i>command-list</i> <b>done</b> 
+
+  </dd><dd><b>until</b> <i>command-list</i> <b>do</b> <i>command-list</i> <b>done</b> 
+
+  </dd><dd><b>case</b> <i>word</i> <b>in</b> <i>case-part</i> <b>... esac</b> 
+  </dd><dd><b>if</b> <i>command-list</i> <b>then</b> <i>command-list else-part</i> 
+  <b>fi</b> 
+  </dd><dt><i>pipeline:</i> 
+  </dt><dd><i>command</i> 
+  </dd><dd><i>pipeline</i> <b>|</b> <i>command</i> 
+  </dd><dt><i>andor:</i> 
+  </dt><dd><i>pipeline</i> 
+  </dd><dd><i>andor</i> <b>&amp;&amp;</b> <i>pipeline</i> 
+  </dd><dd><i>andor</i> <b>||</b> <i>pipeline</i> 
+  </dd><dt><i>command-list:</i> 
+  </dt><dd><i>andor</i> 
+  </dd><dd><i>command-list</i> <b>;</b> 
+  </dd><dd><i>command-list</i> <b>&amp;</b> 
+  </dd><dd><i>command-list</i> <b>;</b> <i>andor</i> 
+  </dd><dd><i>command-list</i> <b>&amp;</b> <i>andor</i> 
+  </dd><dt><i>input-output:</i> 
+  </dt><dd><b>&gt;</b> <i>file</i> 
+  </dd><dd><b>&lt;</b> <i>file</i> 
+  </dd><dd><b>&gt;&gt;</b> <i>word</i> 
+  </dd><dd><b>&lt;&lt;</b> <i>word</i> 
+  </dd><dt><i>file:</i> 
+  </dt><dd><i>word</i> 
+  </dd><dd><b>&amp;</b> <i>digit</i> 
+  </dd><dd><b>&amp;</b> <i>-</i> 
+  </dd><dt><i>case-part:</i> 
+  </dt><dd><i>pattern</i> <b>)</b> <i>command-list</i> <b>;;</b> 
+  </dd><dt><i>pattern:</i> 
+  </dt><dd><i>word</i> 
+  </dd><dd><i>pattern</i> <b>|</b> <i>word</i> 
+  </dd><dt><i>else-part:</i> 
+  </dt><dd><b>elif</b> <i>command-list</i> <b>then</b> <i>command-list else-part</i> 
+  </dd><dd><b>else</b> <i>command-list</i> 
+  </dd><dd><i>empty</i> 
+  </dd><dt><i>empty:</i> 
+  </dt><dt><i>word:</i> 
+  </dt><dd>非空白字符的一个序列 
+  </dd><dt><i>name:</i> 
+  </dt><dd>以一个字母开始的字母、数字或下划线的一个序列 
+  </dd><dt><i>digit:</i> 
+  </dt><dd><b>0 1 2 3 4 5 6 7 8 9</b> </dd></dl>
+<hr>
+
+<h3>附录 <a name="B">B</a> - 元字符和保留字 </h3>a) 句法 
+<dl compact="compact">
+  <dt><b>|</b> 
+  </dt><dd>管道符号 
+  </dd><dt><b>&amp;&amp;</b> 
+  </dt><dd>‘andf’符号 
+  </dd><dt><b>||</b> 
+  </dt><dd>‘orf’符号 
+  </dd><dt><b>;</b> 
+  </dt><dd>命令分隔符 
+  </dd><dt><b>;;</b> 
+  </dt><dd>case 分界符 
+  </dd><dt><b>&amp;</b> 
+  </dt><dd>后台命令 
+  </dd><dt><b>( )</b> 
+  </dt><dd>命令组合 
+  </dd><dt><b>&lt;</b> 
+  </dt><dd>输入重定向 
+  </dd><dt><b>&lt;&lt;</b> 
+  </dt><dd>输入字立即文件 
+  </dd><dt><b>&gt;</b> 
+  </dt><dd>输出重定向 
+  </dd><dt><b>&gt;&gt;</b> 
+  </dt><dd>输出添加 </dd></dl>b) 模式 
+<dl compact="compact">
+  <dt><b>*</b> 
+  </dt><dd>匹配任何字符包括空 
+  </dd><dt><b>?</b> 
+  </dt><dd>匹配任何单一字符 
+  </dd><dt><b>[...]</b> 
+  </dt><dd>匹配包围的字符中的任何一个 </dd></dl>c) 替换 
+<dl compact="compact">
+  <dt><b>${...}</b> 
+  </dt><dd>替换 shell 变量 
+  </dd><dt><b>`...`</b> 
+  </dt><dd>替换为命令输出 </dd></dl>d) 引用 
+<dl compact="compact">
+  <dt><b>\</b> 
+  </dt><dd>引用下一个字符 
+  </dd><dt><b>'...'</b> 
+  </dt><dd>引用包围的字符，不包括 ' 
+  </dd><dt><b>"..."</b> 
+  </dt><dd>引用包围的字符，不包括 <b>$ ` \ "</b> </dd></dl>e) 保留字 <pre><b>if then else elif fi</b>
+<b>case in esac</b>
+<b>for while until do done</b>
+<b>{</b> <b>}</b>
+</pre>
+
+
+<p>原文出处 <a href="http://www2.linuxforum.net/mhss/shell/bsh.html">
+http://www2.linuxforum.net/mhss/shell/bsh.html</a><br>
+<a href="http://www.kerneltravel.net/newbie/newbie.htm">&lt;&lt;返回</a> </p>
+<a href="http://www.kerneltravel.net/index.htm">&lt;&lt;返回首页</a>
+
+</body></html>

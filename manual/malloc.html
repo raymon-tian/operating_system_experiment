@@ -1,0 +1,38 @@
+<p><head>
+<title>malloc</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head></p>
+
+<h1>内存分配算法: malloc</h1>
+
+<h2>API参考</h2>
+
+<ul>
+<li><a href="api/malloc.html">malloc</a></li>
+<li><a href="api/free.html">free</a></li>
+</ul>
+
+
+<h2>测试用例</h2>
+
+<ul>
+<li><a href="malloc/test.c">测试用例</a></li>
+<li><a href="arch/malloc.c">框架程序</a></li>
+</ul>
+
+
+<h2>题目</h2>
+
+<ul>
+<li>malloc.c: 编写my_malloc/my_free函数
+
+<ul>
+<li>功能与malloc/free相同</li>
+<li>基于首次适应算法</li>
+<li>释放内存块时候，能够对相邻空闲内存块进行合并</li>
+<li>使用my_malloc替换malloc，能够通过上述测试用例</li>
+<li>实现print_free_memory，打印当前空闲内存数目，检查它的输出是否正常</li>
+</ul>
+</li>
+</ul>
+

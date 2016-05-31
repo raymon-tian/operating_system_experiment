@@ -1,0 +1,108 @@
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>文件描述符和句柄</title>
+</head>
+
+<body style="font-weight:bold; font-size:150%;">
+<center>文件描述符和句柄</center>
+<ol>
+
+<li>系统调用
+<pre>
+int open(char *path, int flag);
+int read(int fd, char *buf, int bufsize);
+int write(int fd, char *buf, int bufsize);
+int lseek(int fd, int offset, int origin);
+int close(int fd);
+</pre>
+</li>
+
+<li>读写范例
+<pre>
+int main()
+{
+    int fd;
+    char buf[1024];
+
+    // 假设readme.txt文件大小为2048个字节
+    fd = open("readme.txt", O_RDONLY);
+    read(fd, buf, 1024);  // 读入前1024个字节
+    read(fd, buf, 1024);  // 读入后1024个字节
+    close(fd);
+}
+</pre>
+</li>
+
+<li>索引节点
+<pre>
+struct inode {
+   int size;
+   int address[10];
+};
+</pre>
+</li>
+
+<li>文件描述符
+<pre>
+struct file {
+    int position;  // 隐含的访问位置
+    struct inode *inode;
+};
+</pre>
+</li>
+
+<li>进程控制块和文件描述符表
+<pre>
+struct pcb {
+    struct file* file_table[20]; // 进程可以打开20个文件
+};
+
+struct pcb * current; // 当前进程控制块
+</pre>
+</li>
+
+<li>"用户文件描述符"转换为"内核文件描述符"
+<pre>
+int sys_read(int fd, char *buf, int bufsize)
+{
+    struct file * file = current-&gt;file_table[fd];
+    struct inode * inode = file-&gt;inode;
+
+    根据inode-&gt;address和file-&gt;position读取number个字节
+    file-&gt;position += number;
+    return number;
+}
+</pre>
+</li>
+
+<li>lseek的实现
+<pre>
+int sys_lseek(int fd, int offset, int origin)
+{
+    struct file * file = current-&gt;file_table[fd];
+    switch (origin) {
+        case 0:
+            curret-&gt;position = offset;
+            break;
+        case 1:
+            curret-&gt;position += offset;
+            break;
+        case 2:
+            int size = current-&gt;inode-&gt;size; 
+            curret-&gt;position = size + offset;
+            break;
+    }
+}
+</pre>
+</li>
+
+<li>last update
+<pre>
+2009-03-09
+</pre>
+</li>
+
+</ol>
+</body>
+</html>

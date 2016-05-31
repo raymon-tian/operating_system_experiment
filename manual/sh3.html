@@ -1,0 +1,53 @@
+<p><head>
+<title>Shell第3版</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+</head></p>
+
+<h1>Shell第3版</h1>
+
+<h2>API参考</h2>
+
+<ul>
+<li><a href="api/pipe.html">pipe</a></li>
+</ul>
+
+
+<h2>例子</h2>
+
+<ul>
+<li><a href="shell/pipe1.c">pipe1</a></li>
+<li><a href="shell/pipe2.c">pipe2</a></li>
+<li><a href="shell/pipe3.c">pipe3</a></li>
+<li><a href="shell/pipe4.c">pipe4</a></li>
+</ul>
+
+
+<h2>题目</h2>
+
+<ul>
+<li>sh3.c: 实现shell程序，要求在第2版的基础上，添加如下功能
+
+<ul>
+<li><p>实现管道
+<pre>
+$ cat /etc/passwd | wc -l
+</pre></p></li>
+<li><p>实现管道和文件重定向
+<pre>
+$ cat input.txt
+3
+2
+1
+3
+2
+1
+$ cat &lt;input.txt | sort | uniq | cat >output.txt
+$ cat output.txt
+1
+2
+3
+</pre></p></li>
+</ul>
+</li>
+</ul>
+
